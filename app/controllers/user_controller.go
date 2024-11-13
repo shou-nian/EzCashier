@@ -65,7 +65,7 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
-	c.Header("jwt", jwt)
+	c.Header("Authorization", jwt)
 
 	// Return created user
 	c.JSON(http.StatusCreated, gin.H{
