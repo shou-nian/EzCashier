@@ -21,11 +21,13 @@ func main() {
 
 	// Initialize a new router.
 	router := gin.New()
-
-	// Use JWT middleware
-	router.Use(middleware.JWTMiddleware())
+	router.Use(gin.Recovery())
 
 	// List of app routes:
+	routers.PublicRoutes(router)
+
+	// Private routers use the JWT middleware
+	router.Use(middleware.JWTMiddleware())
 	routers.PrivateRoutes(router)
 
 	// Initialize server.

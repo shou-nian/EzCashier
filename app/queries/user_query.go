@@ -55,3 +55,13 @@ func (q *UserQueries) GetUser(id uint) (*models.User, error) {
 
 	return user, nil
 }
+
+func (q *UserQueries) GetUserByPhoneNum(phone string) (*models.User, error) {
+	var user *models.User
+	result := q.Where("phone_num = ?", phone).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return user, nil
+}
