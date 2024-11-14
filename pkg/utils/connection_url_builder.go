@@ -8,8 +8,9 @@ import (
 type ConnectionName string
 
 const (
-	MysqlConnection  ConnectionName = "mysql"
 	ServerConnection ConnectionName = "server"
+	MysqlConnection  ConnectionName = "mysql"
+	RedisConnection  ConnectionName = "redis"
 )
 
 // ConnectionURLBuilder func for building URL connection.
@@ -19,6 +20,13 @@ func ConnectionURLBuilder(n ConnectionName) (string, error) {
 
 	// Switch given names.
 	switch n {
+	case ServerConnection:
+		// URL for server connection.
+		url = fmt.Sprintf(
+			"%s:%s",
+			os.Getenv("SERVER_HOST"),
+			os.Getenv("SERVER_PORT"),
+		)
 	case MysqlConnection:
 		// URL for MySQL connection.
 		url = fmt.Sprintf(
@@ -29,13 +37,14 @@ func ConnectionURLBuilder(n ConnectionName) (string, error) {
 			os.Getenv("DB_PORT"),
 			os.Getenv("DB_NAME"),
 		)
-	case ServerConnection:
-		// URL for server connection.
+	case RedisConnection:
+		// URL for Redis connection.
 		url = fmt.Sprintf(
 			"%s:%s",
-			os.Getenv("SERVER_HOST"),
-			os.Getenv("SERVER_PORT"),
+			os.Getenv("REDIS_HOST"),
+			os.Getenv("REDIS_PORT"),
 		)
+	case "":
 	default:
 		// Return error message.
 		return "", fmt.Errorf("connection name '%v' is not supported", n)
