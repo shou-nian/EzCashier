@@ -1,12 +1,17 @@
 package controllers
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/shou-nian/EzCashier/app/models"
+	"github.com/shou-nian/EzCashier/pkg/redis"
 	"github.com/shou-nian/EzCashier/pkg/utils"
 	"github.com/shou-nian/EzCashier/repository/database"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 )
 
 func Login(c *gin.Context) {
@@ -40,11 +45,25 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Set new JWT token to response header
+	// Generate new JWT token
 	jwt, err := utils.GenerateNewJWTAccessToken(user.ID, user.Role)
 	if err != nil {
 		panic(err)
 	}
+
+	// Cache new JWT token to Redis
+	rds, err := redis.OpenRedisConnection()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+	expiration, _ := strconv.Atoi(os.Getenv("JWT_EXPIRES"))
+	err = rds.Set(ctx, user.PhoneNum, jwt, time.Duration(expiration)*60*60*time.Second)
+	if err != nil {
+		panic(err)
+	}
+
+	// Set new JWT token to response header
 	c.Header("Authorization", jwt)
 
 	// Return created user
@@ -52,4 +71,10 @@ func Login(c *gin.Context) {
 		"message": "login successful.",
 		"user":    user,
 	})
+}
+
+func Logout(c *gin.Context) {
+	// Clear JWT token from response header
+	c.Header("Authorization", "")
+	c.JSON(http.StatusOK, gin.H{"message": "logout successful."})
 }
