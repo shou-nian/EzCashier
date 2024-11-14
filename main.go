@@ -24,11 +24,11 @@ func main() {
 	router.Use(gin.Recovery())
 
 	// List of app routes:
-	routers.PublicRoutes(router)
+	routers.PublicRouters(router)
 
 	// Private routers use the JWT middleware
 	router.Use(middleware.JWTMiddleware())
-	routers.PrivateRoutes(router)
+	routers.PrivateRouters(router)
 
 	// Initialize server.
 	server := configs.ServerConfig(router)

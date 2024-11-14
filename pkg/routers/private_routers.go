@@ -8,13 +8,17 @@ import (
 
 const userRouterPath = "/api/v1/user"
 
-// PrivateRoutes func for describe group of private routes.
-func PrivateRoutes(router *gin.Engine) {
+// PrivateRouters func for describe group of private routes.
+func PrivateRouters(router *gin.Engine) {
 	// Use JWT middleware.
 	router.Use(middleware.PrivateAuthorizationMiddleware())
 	{
+		// user private routers
 		router.POST(userRouterPath, controllers.CreateUser)
 		router.PUT(userRouterPath, controllers.UpdateUser)
 		router.DELETE(userRouterPath, controllers.DeleteUser)
+
+		// auth private routers
+		router.POST("/api/v1/logout", controllers.Logout)
 	}
 }

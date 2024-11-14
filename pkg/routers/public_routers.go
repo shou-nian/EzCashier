@@ -5,12 +5,9 @@ import (
 	"github.com/shou-nian/EzCashier/app/controllers"
 )
 
-const authRouterPath = "/api/v1/login"
-
-// PublicRoutes func for describe group of private routes.
-func PublicRoutes(router *gin.Engine) {
-	// Use JWT middleware.
+// PublicRouters func for describe group of private routes.
+func PublicRouters(router *gin.Engine) {
 	{
-		router.POST(authRouterPath, controllers.Login)
+		router.POST("/api/v1/login", controllers.Login)
 	}
 }

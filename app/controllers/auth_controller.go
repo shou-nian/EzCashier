@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/shou-nian/EzCashier/app/models"
 	"github.com/shou-nian/EzCashier/pkg/redis"
 	"github.com/shou-nian/EzCashier/pkg/utils"
@@ -56,7 +57,7 @@ func Login(c *gin.Context) {
 		panic(err)
 	}
 	expiration, _ := strconv.Atoi(os.Getenv("JWT_EXPIRES"))
-	err = rds.Set(user.PhoneNum, jwt, time.Duration(expiration)*60*60*time.Second)
+	err = rds.Set(strconv.Itoa(int(user.ID)), jwt, time.Duration(expiration)*60*60*time.Second)
 	if err != nil {
 		panic(err)
 	}
@@ -72,6 +73,14 @@ func Login(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
+	token := c.Value("jwt").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+
+	// Remove JWT token from Redis cache
+	// Not cover error
+	rds, _ := redis.OpenRedisConnection()
+	_ = rds.Delete(strconv.Itoa(int(claims["id"].(float64))))
+
 	// Clear JWT token from response header
 	c.Header("Authorization", "")
 	c.JSON(http.StatusOK, gin.H{"message": "logout successful."})
