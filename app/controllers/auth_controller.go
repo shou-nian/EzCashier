@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/shou-nian/EzCashier/app/models"
@@ -56,9 +55,8 @@ func Login(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	ctx := context.Background()
 	expiration, _ := strconv.Atoi(os.Getenv("JWT_EXPIRES"))
-	err = rds.Set(ctx, user.PhoneNum, jwt, time.Duration(expiration)*60*60*time.Second)
+	err = rds.Set(user.PhoneNum, jwt, time.Duration(expiration)*60*60*time.Second)
 	if err != nil {
 		panic(err)
 	}
