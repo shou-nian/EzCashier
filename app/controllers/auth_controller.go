@@ -46,7 +46,7 @@ func Login(c *gin.Context) {
 	user, err := db.GetUserByPhoneNum(request.PhoneNum)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": http.StatusText(http.StatusInternalServerError),
 		})
 		return
 	}
