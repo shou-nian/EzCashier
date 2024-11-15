@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/shou-nian/EzCashier/pkg/redis"
 	"net/http"
 	"os"
-	"time"
+	"strconv"
 )
 
 // JWTMiddleware returns a Gin middleware function that validates JWT tokens.
@@ -46,42 +47,48 @@ func JWTMiddleware() gin.HandlerFunc {
 }
 
 // PrivateAuthorizationMiddleware returns a Gin middleware function that performs
-// authorization checks for private routes.
+// additional authorization checks for private routes.
 //
-// This middleware verifies if the user has the necessary credentials to access
-// a protected resource. It checks the JWT token (which should be set in the Gin
-// context by a previous middleware) for the user's admin status and token expiration.
-// If the user is not an admin or the token has expired, the request is aborted
-// with a 401 Unauthorized status.
+// This middleware assumes that a JWT token has already been validated and set in the
+// Gin context. It performs the following checks:
+//  1. Verifies that the JWT token in the request matches the one cached in Redis.
+//  2. For specific routes (e.g., user management), it checks for admin privileges.
 //
-// The function doesn't take any parameters directly, but it uses the Gin context
-// to access the JWT token and its claims.
+// If any of these checks fail, the middleware will abort the request with an
+// appropriate HTTP status code (401 Unauthorized or 403 Forbidden).
 //
 // Returns:
 //
-//	gin.HandlerFunc: A middleware function that can be used in a Gin router
-//	                 to protect private routes.
+//	gin.HandlerFunc: A middleware function that can be used in a Gin router to
+//	                 enforce private route authorization.
 func PrivateAuthorizationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Check if the user is authorized to access the requested resource
-		// If not, return a 401 Unauthorized status code
-		// Get now time
-		now := time.Now().Unix()
-
 		// Get data from JWT
 		token := c.Value("jwt").(*jwt.Token)
 		claims := token.Claims.(jwt.MapClaims)
 
-		// Set expiration time from JWT data of current user.
-		expires := claims["expires"].(float64)
-
-		// Set credential `admin` from JWT data of current user.
-		credential := claims["admin"].(bool)
-
-		// Only user with `admin` credential can create a new user profile.
-		if !credential || now >= int64(expires) {
+		// Check redis cached jwt equal to request jwt
+		rds, err := redis.OpenRedisConnection()
+		if err != nil {
+			panic(err)
+		}
+		cachedToken, err := rds.Get(strconv.Itoa(int(claims["id"].(float64))))
+		// If not cached token (expiration) or request jwt token not equal to cached token
+		// Return Unauthorized code
+		if err != nil || cachedToken != token.Raw {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
+		}
+
+		switch c.Request.URL.Path {
+		case "/api/v1/user":
+			// Only user with `admin` credential can create a new user & delete user.
+			if c.Request.Method == http.MethodPost || c.Request.Method == http.MethodDelete {
+				if !claims["admin"].(bool) {
+					c.AbortWithStatus(http.StatusForbidden)
+					return
+				}
+			}
 		}
 
 		// If the user is authorized, continue to the next middleware or route handler
