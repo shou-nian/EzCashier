@@ -44,7 +44,6 @@ func ConnectionURLBuilder(n ConnectionName) (string, error) {
 			os.Getenv("REDIS_HOST"),
 			os.Getenv("REDIS_PORT"),
 		)
-	case "":
 	default:
 		// Return error message.
 		return "", fmt.Errorf("connection name '%v' is not supported", n)
