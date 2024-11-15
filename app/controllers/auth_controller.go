@@ -14,6 +14,18 @@ import (
 	"time"
 )
 
+// Login godoc
+// @Summary User login
+// @Description Authenticate a user and return a JWT token
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param login body models.LoginRequest true "Login credentials"
+// @Success 200 {object} models.User "Successful login"
+// @Failure 400 {object} gin.H "Bad request"
+// @Failure 401 {object} gin.H "Unauthorized"
+// @Failure 500 {object} gin.H "Internal server error"
+// @Router /login [post]
 func Login(c *gin.Context) {
 	request := &models.LoginRequest{}
 
@@ -72,6 +84,15 @@ func Login(c *gin.Context) {
 	})
 }
 
+// Logout godoc
+// @Summary User logout
+// @Description Logout a user and invalidate their JWT token
+// @Tags authentication
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 200 {object} gin.H "Successful logout"
+// @Failure 401 {object} gin.H "Unauthorized"
+// @Router /logout [post]
 func Logout(c *gin.Context) {
 	token := c.Value("jwt").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
