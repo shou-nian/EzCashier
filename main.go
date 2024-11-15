@@ -21,6 +21,9 @@ func main() {
 
 	// Initialize a new router.
 	router := gin.New()
+	// Use Gin's Logger middleware, it will log all requests using the default logger.
+	router.Use(gin.Logger())
+	// Use Gin's cover all panic errors middleware
 	router.Use(gin.Recovery())
 
 	// List of app routes:
