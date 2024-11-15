@@ -46,7 +46,7 @@ func Login(c *gin.Context) {
 	}
 
 	// Generate new JWT token
-	jwt, err := utils.GenerateNewJWTAccessToken(user.ID, user.Role)
+	token, err := utils.GenerateNewJWTAccessToken(user.ID, user.Role)
 	if err != nil {
 		panic(err)
 	}
@@ -57,13 +57,13 @@ func Login(c *gin.Context) {
 		panic(err)
 	}
 	expiration, _ := strconv.Atoi(os.Getenv("JWT_EXPIRES"))
-	err = rds.Set(strconv.Itoa(int(user.ID)), jwt, time.Duration(expiration)*60*60*time.Second)
+	err = rds.Set(strconv.Itoa(int(user.ID)), token, time.Duration(expiration)*60*60*time.Second)
 	if err != nil {
 		panic(err)
 	}
 
 	// Set new JWT token to response header
-	c.Header("Authorization", jwt)
+	c.Header("Authorization", token)
 
 	// Return created user
 	c.JSON(http.StatusCreated, gin.H{
