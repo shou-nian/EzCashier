@@ -12,6 +12,25 @@ import (
 	_ "github.com/joho/godotenv/autoload" // auto load environment variables
 )
 
+// @title EzCashier API
+// @version 1.0
+// @description This is the API server for the EzCashier application.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host 127.0.0.1:8080
+// @BasePath /api/v1
+// @schemes http https
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	// Run auto migration
 	err := migrations.AutoMigration()
@@ -27,11 +46,17 @@ func main() {
 	router.Use(gin.Recovery())
 
 	// List of app routes:
-	routers.PublicRouters(router)
+	{
+		// Swagger routers:
+		routers.SwaggerRoutes(router)
 
-	// Private routers use the JWT middleware
-	router.Use(middleware.JWTMiddleware())
-	routers.PrivateRouters(router)
+		// Public routers:
+		routers.PublicRouters(router)
+
+		// Private routers use the JWT middleware
+		router.Use(middleware.JWTMiddleware())
+		routers.PrivateRouters(router)
+	}
 
 	// Initialize server.
 	server := configs.ServerConfig(router)

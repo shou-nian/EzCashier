@@ -24,7 +24,7 @@ import (
 // @Success 201 {object} models.User "User created successfully"
 // @Failure 400 {object} gin.H "Bad request"
 // @Failure 500 {object} gin.H "Internal server error"
-// @Router /api/v1/user [post]
+// @Router /user [post]
 func CreateUser(c *gin.Context) {
 	user := &models.User{}
 	request := &models.CreateUserRequest{}
@@ -85,7 +85,7 @@ func CreateUser(c *gin.Context) {
 // @Success 200 {object} models.User "User role updated successfully"
 // @Failure 400 {object} gin.H "Bad request"
 // @Failure 500 {object} gin.H "Internal server error"
-// @Router /api/v1/admin [put]
+// @Router /admin [put]
 func UpdateUserRole(c *gin.Context) {
 	user := &models.User{}
 	request := &models.UpdateUserRoleRequest{}
@@ -157,7 +157,7 @@ func UpdateUserRole(c *gin.Context) {
 // @Failure 400 {object} gin.H "Bad request"
 // @Failure 500 {object} gin.H "Internal server error"
 // @Security ApiKeyAuth
-// @Router /api/v1/user [put]
+// @Router /user [put]
 func UpdateUserInfo(c *gin.Context) {
 	user := &models.User{}
 	request := &models.UpdateUserInfoRequest{}
@@ -224,7 +224,7 @@ func UpdateUserInfo(c *gin.Context) {
 // @Failure 400 {object} gin.H "Bad request"
 // @Failure 500 {object} gin.H "Internal server error"
 // @Security ApiKeyAuth
-// @Router /api/v1/password [put]
+// @Router /password [put]
 func UpdatePassword(c *gin.Context) {
 	user := &models.User{}
 	request := &models.UpdatePassword{}
@@ -322,7 +322,7 @@ func UpdatePassword(c *gin.Context) {
 // @Failure 400 {object} gin.H "Bad request"
 // @Failure 500 {object} gin.H "Internal server error"
 // @Security ApiKeyAuth
-// @Router /api/v1/admin [delete]
+// @Router /admin [delete]
 func DeleteUser(c *gin.Context) {
 	user := &models.User{}
 	request := &models.DeleteUser{}

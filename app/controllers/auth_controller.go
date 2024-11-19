@@ -23,9 +23,9 @@ import (
 // @Param login body models.LoginRequest true "Login credentials"
 // @Success 200 {object} models.User "Successful login"
 // @Failure 400 {object} gin.H "Bad request"
-// @Failure 401 {object} gin.H "Unauthorized"
+// @Failure 403 {object} gin.H "Forbidden"
 // @Failure 500 {object} gin.H "Internal server error"
-// @Router /api/v1/login [post]
+// @Router /login [post]
 func Login(c *gin.Context) {
 	request := &models.LoginRequest{}
 
@@ -53,13 +53,13 @@ func Login(c *gin.Context) {
 
 	// Check password is equal
 	if !utils.CheckPasswordHash(request.Password, user.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid username or password."})
 		return
 	}
 
 	// Check user status is active
 	if user.UserStatus != models.StatusActive {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User is not active."})
+		c.JSON(http.StatusForbidden, gin.H{"error": "User is not active."})
 		return
 	}
 
@@ -98,7 +98,7 @@ func Login(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} gin.H "Successful logout"
 // @Failure 401 {object} gin.H "Unauthorized"
-// @Router /api/v1/logout [post]
+// @Router /logout [post]
 func Logout(c *gin.Context) {
 	token := c.Value("jwt").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)

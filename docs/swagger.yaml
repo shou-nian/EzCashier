@@ -1,0 +1,378 @@
+basePath: /api/v1
+definitions:
+  gin.H:
+    additionalProperties: {}
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  models.CreateUserRequest:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      password:
+        maxLength: 18
+        minLength: 8
+        type: string
+      phone_num:
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/models.UserRole'
+        enum:
+        - admin
+        - user
+        - viewer
+    required:
+    - name
+    - password
+    - phone_num
+    - role
+    type: object
+  models.DeleteUser:
+    properties:
+      phone_num:
+        type: string
+    required:
+    - phone_num
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        maxLength: 18
+        minLength: 8
+        type: string
+      phone_num:
+        type: string
+    required:
+    - password
+    - phone_num
+    type: object
+  models.UpdatePassword:
+    properties:
+      confirm_password:
+        maxLength: 18
+        minLength: 8
+        type: string
+      new_password:
+        maxLength: 18
+        minLength: 8
+        type: string
+      old_password:
+        maxLength: 18
+        minLength: 8
+        type: string
+    required:
+    - confirm_password
+    - new_password
+    - old_password
+    type: object
+  models.UpdateUserInfoRequest:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      phone_num:
+        type: string
+    type: object
+  models.UpdateUserRoleRequest:
+    properties:
+      phone_num:
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/models.UserRole'
+        enum:
+        - admin
+        - user
+        - viewer
+    required:
+    - phone_num
+    - role
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      name:
+        description: Name is the full name of the user
+        type: string
+      phone_num:
+        description: Email is the unique identifier for the user
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/models.UserRole'
+        description: Role defines the user's role in the system, determining their
+          permissions
+      status:
+        allOf:
+        - $ref: '#/definitions/models.UserStatus'
+        description: UserStatus represents the current status of the user (e.g., active,
+          inactive)
+      updatedAt:
+        type: string
+    required:
+    - name
+    - phone_num
+    type: object
+  models.UserRole:
+    enum:
+    - admin
+    - user
+    - viewer
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleUser
+    - RoleViewer
+  models.UserStatus:
+    enum:
+    - active
+    - inactive
+    type: string
+    x-enum-varnames:
+    - StatusActive
+    - StatusInactive
+host: 127.0.0.1:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the API server for the EzCashier application.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: EzCashier API
+  version: "1.0"
+paths:
+  /admin:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing user
+      parameters:
+      - description: User deletion data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the role of an existing user
+      parameters:
+      - description: User role update data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User role updated successfully
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Update user role
+      tags:
+      - users
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful login
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: User login
+      tags:
+      - authentication
+  /logout:
+    post:
+      description: Logout a user and invalidate their JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful logout
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - ApiKeyAuth: []
+      summary: User logout
+      tags:
+      - authentication
+  /password:
+    put:
+      consumes:
+      - application/json
+      description: Update the password of the authenticated user
+      parameters:
+      - description: Password update data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password updated successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user password
+      tags:
+      - users
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with the provided information
+      parameters:
+      - description: User creation data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Create a new user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the information of the authenticated user
+      parameters:
+      - description: User info update data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User information updated successfully
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user information
+      tags:
+      - users
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
