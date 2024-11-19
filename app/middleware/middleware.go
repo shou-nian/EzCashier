@@ -81,13 +81,16 @@ func PrivateAuthorizationMiddleware() gin.HandlerFunc {
 		}
 
 		switch c.Request.URL.Path {
-		case "/api/v1/user":
-			// Only user with `admin` credential can create a new user & delete user.
-			if c.Request.Method == http.MethodPost || c.Request.Method == http.MethodDelete {
-				if !claims["admin"].(bool) {
-					c.AbortWithStatus(http.StatusForbidden)
-					return
-				}
+		case "/api/v1/admin":
+			// Only with `admin` credential can create & delete user & update user role.
+			if !claims["admin"].(bool) {
+				c.AbortWithStatus(http.StatusForbidden)
+				return
+			}
+		case "api/v1/user":
+			if !claims["user"].(bool) || !claims["admin"].(bool) {
+				c.AbortWithStatus(http.StatusForbidden)
+				return
 			}
 		}
 

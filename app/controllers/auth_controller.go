@@ -25,7 +25,7 @@ import (
 // @Failure 400 {object} gin.H "Bad request"
 // @Failure 401 {object} gin.H "Unauthorized"
 // @Failure 500 {object} gin.H "Internal server error"
-// @Router /login [post]
+// @Router /api/v1/login [post]
 func Login(c *gin.Context) {
 	request := &models.LoginRequest{}
 
@@ -54,6 +54,12 @@ func Login(c *gin.Context) {
 	// Check password is equal
 	if !utils.CheckPasswordHash(request.Password, user.Password) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password."})
+		return
+	}
+
+	// Check user status is active
+	if user.UserStatus != models.StatusActive {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User is not active."})
 		return
 	}
 
@@ -92,7 +98,7 @@ func Login(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} gin.H "Successful logout"
 // @Failure 401 {object} gin.H "Unauthorized"
-// @Router /logout [post]
+// @Router /api/v1/logout [post]
 func Logout(c *gin.Context) {
 	token := c.Value("jwt").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)

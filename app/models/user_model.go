@@ -51,11 +51,21 @@ type CreateUserRequest struct {
 }
 
 type UpdateUserRoleRequest struct {
-	Role UserRole `json:"role" binding:"required,oneof=admin user viewer"`
+	PhoneNum string   `json:"phone_num" binding:"required,len=11"`
+	Role     UserRole `json:"role" binding:"required,oneof=admin user viewer"`
 }
 
 type UpdateUserInfoRequest struct {
 	Name     string `json:"name" binding:"min=1,max=100"`
 	PhoneNum string `json:"phone_num" binding:"len=11"`
-	Password string `json:"password" binding:"min=8,max=18"`
+}
+
+type UpdatePassword struct {
+	OldPassword     string `json:"old_password" binding:"required,min=8,max=18"`
+	NewPassword     string `json:"new_password" binding:"required,min=8,max=18"`
+	ConfirmPassword string `json:"confirm_password" binding:"required,min=8,max=18"`
+}
+
+type DeleteUser struct {
+	PhoneNum string `json:"phone_num" binding:"required,len=11"`
 }
