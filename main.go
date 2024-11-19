@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/shou-nian/EzCashier/app/middleware"
 	"github.com/shou-nian/EzCashier/pkg/configs"
@@ -44,6 +45,14 @@ func main() {
 	router.Use(gin.Logger())
 	// Use Gin's cover all panic errors middleware
 	router.Use(gin.Recovery())
+	// Use CORS middleware
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://127.0.0.1:8080", "http://0.0.0.0:8080"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	// List of app routes:
 	{
